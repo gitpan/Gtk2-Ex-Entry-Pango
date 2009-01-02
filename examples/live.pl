@@ -29,7 +29,7 @@ sub main {
 	my $markup = Gtk2::Entry->new();
 	my $entry = Gtk2::Ex::Entry::Pango->new();
 	
-	my $button_apply = Gtk2::Button->new('Aply');
+	my $button_apply = Gtk2::Button->new('Apply');
 	
 	my $hbox_bottom = new Gtk2::HBox(FALSE, 0);
 	$hbox_bottom->pack_start($markup, TRUE, TRUE, 0);
@@ -42,7 +42,7 @@ sub main {
 	$window->set_focus_child($markup);
 	$window->add($vbox);
 	
-	# Use pango markup
+	# Use Pango markup
 	$entry->set_markup(
 		'<i>Pan</i><b>go</b> is <span underline="error" underline_color="red">fun</span>'
 	);
