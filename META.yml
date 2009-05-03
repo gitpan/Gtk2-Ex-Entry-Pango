@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Gtk2-Ex-Entry-Pango
-version:             0.05
+version:             0.06_01
 abstract:            Gtk2 Entry that accepts Pango markup.
 license:             ~
 author:              
@@ -8,7 +8,8 @@ author:
 generated_by:        ExtUtils::MakeMaker version 6.42
 distribution_type:   module
 requires:     
-    Gtk2:                          0
+    Gtk2:                          1.100
+    Gtk2::Pango:                   0
 meta-spec:
     url:     http://module-build.sourceforge.net/META-spec-v1.3.html
     version: 1.3

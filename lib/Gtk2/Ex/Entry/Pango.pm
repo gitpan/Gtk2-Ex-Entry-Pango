@@ -132,10 +132,20 @@ use strict;
 use warnings;
 
 use Glib qw(TRUE FALSE);
-use Gtk2;
+# Gtk2 with Pango support
+use Gtk2 1.100;
+use Gtk2::Pango;
 
 
-our $VERSION = '0.05';
+# Module version
+our $VERSION = '0.06_01';
+
+
+# Emty Pango attributes list that's used to clear the previous markup
+my $EMPTY_ATTRLIST = ($Gtk2::VERSION >= 1.160) 
+	? Gtk2::Pango::AttrList->new() 
+	: Gtk2::Pango->parse_markup('')
+;
 
 
 # See http://gtk2-perl.sourceforge.net/doc/pod/Glib/Object/Subclass.html
@@ -172,6 +182,14 @@ use Glib::Object::Subclass 'Gtk2::Entry' =>
 			'Markup when empty',
 			'The default Pango markup to display when the entry is empty.',
 			'',
+			['readable', 'writable'],
+		),
+
+		Glib::ParamSpec->boolean(
+			'clear-on-focus',
+			'Clear the markup when the widget has focus',
+			'If the Pango markup to display has to cleared when the entry has focus.',
+			TRUE,
 			['readable', 'writable'],
 		),
 	],
@@ -339,6 +357,45 @@ sub clear_empty_markup {
 
 
 
+=head2 get_clear_on_focus
+
+Returns if the widget's Pango markup will be cleared once the widget is focused
+and has no user text.
+
+=cut
+
+sub get_clear_on_focus {
+	my $self = shift;
+	return $self->get('clear-on-focus');
+}
+
+
+
+=head2 set_clear_on_focus
+
+Returns if the widget's Pango markup will be cleared once the widget is focused
+and has no user text.
+
+Parameters:
+
+=over
+
+=item * $value
+
+A boolean value that dictates if the Pango markup has to be cleared when the
+widget is focused and there's no text entered (the entry is empty).
+
+=back	
+
+=cut
+
+sub set_clear_on_focus {
+	my $self = shift;
+	my ($value) = @_;
+	return $self->set('clear-on-focus', $value);
+}
+
+
 #
 # Applies the markup to the widget. The markup string is parsed into a text to
 # be displayed and an attribute list (the styles to apply). The text is added
@@ -364,13 +421,13 @@ sub apply_markup {
 		$self->request_redraw();
 	}
 	else {
-		# Change the entry's text. Mark this as an internal change as a we can't let
+		# Change the entry's text. Mark this as an internal change as we can't let
 		# the 'changed' callback reset the markup.
 		local $self->{internal} = TRUE;		
 		$self->set(text => $text);
 		
 		if ($self->{internal}) {
-			# The signal 'changed' wasn't emited (it can happen sometimes) so let's
+			# The signal 'changed' wasn't emited (it can happen sometimes) so lets
 			# request a refresh of the UI manually.
 			$self->request_redraw();
 		}
@@ -424,14 +481,27 @@ sub signal_emit_markup_changed {
 sub set_layout_attributes {
 	my $self = shift;
 
-	if ($self->get_text) {
+	if ($self->get_text ne '') {
+		# There's text in the widget apply the attributes (the requested pango
+		# text). If the're attributes simply clear the previous ones.
 		my $attributes = $self->{attributes};
 		if (! defined $attributes) {
-			$attributes = Gtk2::Pango::AttrList->new();
+			# Clear the previous attributes, just in case...
+			$attributes = $EMPTY_ATTRLIST;
 		}
 		$self->get_layout->set_attributes($attributes);
 	}
+	elsif ($self->get('clear-on-focus') and $self->has_focus) {
+		# The widget has focus and is empty, if the user requested that it be
+		# cleared when focused we have to honor it here.
+		my $attributes = $EMPTY_ATTRLIST;
+		$self->get_layout->set_text('');
+		$self->get_layout->set_attributes($attributes);
+		return;
+	}
 	elsif ($self->{empty_markup}) {
+		# The widget is empty and the user wants it filled with a default text at
+		# all times.
 		$self->get_layout->set_text($self->{empty_text});
 		$self->get_layout->set_attributes($self->{empty_attributes});
 	}
