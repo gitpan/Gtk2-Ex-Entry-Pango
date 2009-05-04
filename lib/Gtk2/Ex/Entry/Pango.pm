@@ -138,7 +138,7 @@ use Gtk2::Pango;
 use Carp;
 
 # Module version
-our $VERSION = '0.06_02';
+our $VERSION = '0.06';
 
 
 # Emty Pango attributes list that's used to clear the previous markup
@@ -604,6 +604,18 @@ widget.
 The markup text used by this widget when the entry field is empty. If this
 property is set the entry will display a default string in the widget when
 there's no text provided by the user.
+
+=head2 clear-on-focus
+			'',
+			'Clear the markup when the widget has focus',
+			'If the Pango markup to display has to cleared when the entry has focus.',
+			TRUE,
+			['readable', 'writable'],
+
+(boolean: readable writable)
+
+Indicates if the C<empty-makrup> has to be cleared when the entry is empty and
+the widget has gained focus.
 
 =head1 SIGNALS
 
