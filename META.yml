@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Gtk2-Ex-Entry-Pango
-version:             0.08
+version:             0.09
 abstract:            Gtk2 Entry that accepts Pango markup.
 license:             ~
 author:              
